@@ -1,9 +1,26 @@
+
+
+var penPromise = d3.json("penguins/classData.json");
+
+penPromise.then(function(penguins)
+   {
+       setup(penguins);         
+                
+    }),
+    function(err)
+                {
+    console.log("fail",err);
+    }
+
+
+
 var screen = {width:400,height:500}
 var margins = {top:10,right:50,bottom:50,left:50}
 
-var penPromise = d3.json(classData.json)
 
-var setup = function(array2D)
+
+
+var setup = function(penguins)
 {
     d3.select("svg")
         .attr("width",screen.width)
@@ -18,7 +35,7 @@ var setup = function(array2D)
     var height = screen.height - margins.top - margins.bottom;
     
     var xScale = d3.scaleLinear()
-                .domain([0,9])
+                .domain([0,37])
                 .range([0,width])
     
     var yScale = d3.scaleLinear()
@@ -27,14 +44,15 @@ var setup = function(array2D)
     
     var xAxis = d3.axisBottom(xScale)
     var yAxis = d3.axisLeft(yScale)
+    
     d3.select("svg")
         .append("g")
-        .classed("axis",true);
+        .attr("class","axis");
     
     d3.select(".axis")
         .append("g")
         .attr("id","xAxis")
-        .attr("transform","translate("margins.left+","+(margins.top+height)+")")
+        .attr("transform","translate(" + margins.left + "," + (margins.top + height) + ")")
         .call(xAxis)
     
     d3.select(".axis")
@@ -43,35 +61,61 @@ var setup = function(array2D)
         .attr("transform","translate(25,"+margins.top+")")
         .call(yAxis)
     
-    drawArray(array2D,xScale,yScale);
+    drawArray(penguins, xScale, yScale);
     
 }
 
-var drawArray = function(array2D,xScale,yScale)
+var drawArray = function(penguins, xScale, yScale)
 {
     var arrays = d3.select("#graph")
     .selectAll("g")
-    .data(array2D)
+    .data(penguins)
     .enter()
     .append("g")
+    .attr("fill", "none")
+    .attr("stroke", "blue")
+    .attr("stroke-width",1)
+    .on('mouseover', function(d, i)
     
-    var lineGenerator - d3.line()
+    {
+    d3.select(this)
+        .attr("stroke", "red")
+    d3.select("#image *").remove();
+    d3.select("#image")
+    .append("img")
+    .attr("src", "penguins/" + penguins[i].picture);
+    })
+    .on('mouseout', function()
+    {
+    d3.select(this)
+        .attr("stroke","blue")
+    d3.select("#image *").remove();
+    });
+    
+    
+    var lineGenerator = d3.line()
         .x(function(num,index){return xScale(index)})
         .y(function(num){return yScale(num)})
         .curve(d3.curveNatural)
     
-arrays.datum(function(obj){return obj.arr})
+d3.select("body")
+    .append("div")
+    .attr("id","image");
+    
+arrays.datum(function(obj)
+{
+    return obj.quizes.map(function(d){return d.grade;});
+})
     .append('path')
     .attr("d", lineGenerator)
     
+
 }
+             
+             
     
-var data = [
-    { name:"Fred",arr:[ 3,5,7,9,1,2,4,6,8,10]},
-    { name:"Jeff",arr:[ 9,8,8,6,6,4,4,2,1,0]},
-    
-]
-    setup(data);
+
+
     
     
     
@@ -84,4 +128,3 @@ var data = [
     
     
     
-}
